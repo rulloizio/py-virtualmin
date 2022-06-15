@@ -5,16 +5,13 @@ from urllib3.exceptions import InsecureRequestWarning
 # Suppress only the single warning from urllib3 needed.
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
-cfg = configparser.ConfigParser()
-cfg.read('config.ini')
-
-for host in cfg.sections():
+def getDomainInformation(host,cfg):
     host_dict= {}
     url = "https://{}:{}/virtual-server/remote.cgi".format(host,cfg.get(host,'PORT'))
-    querystring = {"program":"list-domains","json":"1"}
     headers = {
     'user-agent': "Script-Py",
     }
+    querystring = {"program":"list-domains","json":"1"}
     # print(url)
     response = requests.request("GET", url, headers=headers, params=querystring, verify=False, auth=HTTPBasicAuth(cfg.get(host,'USR'),cfg.get(host,'PSW')))
     results = response.json()
@@ -26,4 +23,32 @@ for host in cfg.sections():
         if (split_string and not split_string.group('dominio')=='Domain'):
             #print("{} - {}".format(split_string.group('dominio'),split_string.group('username')))
             host_dict.setdefault(host,[]).append({'Dominio':split_string.group('dominio'), 'Username':split_string.group('username')})
-    print(host_dict)
+    return host_dict
+pass
+
+def getServerInformation(host,cfg):
+    url = "https://{}:{}/virtual-server/remote.cgi".format(host,cfg.get(host,'PORT'))
+    headers = {
+    'user-agent': 'Script-Py',
+    }
+    querystring = {"program":"info","json":"1"}
+    response = requests.request("GET", url, headers=headers, params=querystring, verify=False, auth=HTTPBasicAuth(cfg.get(host,'USR'),cfg.get(host,'PSW')))
+    results = response.json()
+   
+    print ("Connessione a {}: {}  ".format(host,results['status']))
+    # TODO: capire come spiittare per PROPRIETA - valore del response
+    # print(results['output'].split('\n'))
+    print (re.split(r'(\w+\s?\w+:\s)',results['output']))
+    
+pass
+
+cfg = configparser.ConfigParser()
+cfg.read('config.ini')
+
+
+for host in cfg.sections():
+    # FIXME OK da passare a GOOGLE ! 
+    # host_dict= getDomainInformation(host,cfg)
+    # TODO
+    getServerInformation(host,cfg)
+    #print(host_dict)
