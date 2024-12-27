@@ -3,6 +3,6 @@ USR = USERNAME #username webmin root account
 PSW = PASSWORD #pasword webmin root account
 PORT = 10000 # webmin port
 
-#Ogni sezione eun server
+#Ogni sezione e un server
 [server1]
 [server2]
